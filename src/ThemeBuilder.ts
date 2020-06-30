@@ -4,8 +4,13 @@ import htmlRawLoader from './loaders/html-raw-loader';
 // @ts-ignore
 import merge from 'webpack-merge';
 
+const LOADER_HTML_RAW = path.resolve(__dirname, './loaders/html-raw-loader.ts');
+const LOADER_MJML = path.resolve(__dirname, './loaders/mjml-loader.ts');
+const LOADER_PUG = path.resolve(__dirname, './loaders/pug-loader.ts');
+
 export class ThemeBuilder {
 	private entry: any = {};
+	private resources = /\.(png|jpg|jpeg|woff|woff2|ttf)$/i;
 
 	/**
 	 *
@@ -24,6 +29,13 @@ export class ThemeBuilder {
 	 */
 	async build() {
 		// Resource loader
+		const outputLoader = {
+			loader: 'file-loader',
+			options: {
+				outputPath: 'theme',
+				name: '[name].html',
+			},
+		};
 		const resourceLoader = {
 			loader: 'file-loader',
 			options: {
@@ -34,8 +46,13 @@ export class ThemeBuilder {
 		};
 
 		const configBase: webpack.Configuration = {
+			context: path.resolve(__dirname, '../.local/theme'),
+			entry: {
+				login: './login.pug',
+				reset: './reset.mjml.pug',
+			},
 			output: {
-				path: '/tmp/theme',
+				path: path.resolve(__dirname, '../.local/tmp/theme'),
 				filename: 'tmp/[name].js',
 			},
 			module: {
@@ -43,37 +60,31 @@ export class ThemeBuilder {
 					{
 						test: /\.html/,
 						use: [
+							outputLoader,
+							LOADER_HTML_RAW,
+							'extract-loader',
 							{
-								loader: 'file-loader',
+								loader: 'html-loader',
 								options: {
-									outputPath: 'theme',
-									name: '[name].html',
+									minimize: {
+										removeAttributeQuotes: false,
+									},
 								},
 							},
-							{
-								loader: path.resolve(
-									__dirname,
-									'./loaders/html-raw-loader.ts'
-								),
-							},
-							'extract-loader',
-							'html-loader',
 						],
 					},
 					{
 						test: /\.mjml\.pug$/,
 						use: [
-							{
-								loader: 'file-loader',
-								options: {
-									outputPath: 'theme',
-									name: '[name].html',
-								},
-							},
+							outputLoader,
+							LOADER_MJML,
 							'extract-loader',
 							{
 								loader: 'html-loader',
 								options: {
+									minimize: {
+										removeAttributeQuotes: false,
+									},
 									attributes: {
 										list: [
 											{
@@ -85,36 +96,38 @@ export class ThemeBuilder {
 									},
 								},
 							},
-							'pug-plain-loader',
+							LOADER_PUG,
 						],
 					},
 					{
 						test: /\.pug$/,
 						exclude: /\.mjml\.pug$/,
 						use: [
+							outputLoader,
+							LOADER_HTML_RAW,
+							'extract-loader',
 							{
-								loader: 'file-loader',
+								loader: 'html-loader',
 								options: {
-									outputPath: 'theme',
-									name: '[name].html',
+									minimize: {
+										removeAttributeQuotes: false,
+									},
 								},
 							},
-							'extract-loader',
-							'html-loader',
-							'pug-plain-loader',
+							LOADER_PUG,
 						],
 					},
 					{
 						test: /\.css/,
 						use: [
-							//
+							// Load the css
 							resourceLoader,
 							'extract-loader',
 							'css-loader',
 						],
 					},
 					{
-						test: /\.png/,
+						test: this.resources,
 						oneOf: [
 							{
 								resourceQuery: /inline/,
@@ -131,10 +144,11 @@ export class ThemeBuilder {
 
 		const config = merge([configBase]);
 		const compiler = webpack(config);
-		await new Promise((resolve, reject) => {
+		const stats = await new Promise<any>((resolve, reject) => {
 			compiler.run((err: Error | null, stats: any) => {
 				err ? reject(err) : resolve(stats);
 			});
 		});
+		return stats;
 	}
 }
