@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { ThemeBuilder } from './ThemeBuilder';
 import program from 'commander';
 

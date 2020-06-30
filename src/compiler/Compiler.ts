@@ -60,9 +60,9 @@ export class Compiler {
 		// Webpack config
 		const config: webpack.Configuration = {
 			mode: 'production',
-			context: themeDir,
+			context: __dirname,
 			entry: {
-				theme: entrypoint,
+				theme: path.resolve(themeDir, entrypoint),
 			},
 			target: 'node',
 			output: {
@@ -197,7 +197,9 @@ export class Compiler {
 		const entries = [];
 		for (const key in this.options.files) {
 			const file = this.options.files[key];
-			entries.push(`${key}: require(${JSON.stringify(file)})`);
+			entries.push(
+				`${JSON.stringify(key)}: require(${JSON.stringify(file)})`
+			);
 		}
 		const virtualVolume = Volume.fromJSON({
 			[entryPoint]: `module.exports = {

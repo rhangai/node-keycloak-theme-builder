@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Theme builder for keycloak",
   "main": "dist/index.js",
-  "bin": "dist/cli",
+  "bin": "dist/cli.js",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
