@@ -8,6 +8,7 @@ import walkSync from 'walk-sync';
 
 const LOADER_MJML = path.resolve(__dirname, './loaders/mjml-loader');
 const LOADER_PUG = path.resolve(__dirname, './loaders/pug-loader');
+const LOADER_SCRIPT = path.resolve(__dirname, './loaders/script-loader');
 
 export type CompilerOptions = {
 	themeDir: string;
@@ -21,16 +22,13 @@ export type CompilerOutput = {
 };
 
 export class Compiler {
+	private readonly outputDir = '/tmp/theme-builder';
 	private resources = /\.(png|jpg|jpeg|woff|woff2|ttf)$/i;
 
 	/**
-	 * Cria o construtor de tema
+	 * Construct the compiler
 	 */
 	constructor(private readonly options: CompilerOptions) {}
-
-	get outputDir() {
-		return '/tmp/theme-builder';
-	}
 
 	/**
 	 * Build the theme
@@ -60,7 +58,7 @@ export class Compiler {
 			target: 'node',
 			output: {
 				path: this.outputDir,
-				filename: 'theme.js',
+				filename: '[name].js',
 				library: '__THEME__',
 				libraryTarget: 'assign',
 			},
@@ -73,15 +71,7 @@ export class Compiler {
 						test: /\.js$/,
 						issuer: /\.(html|pug)$/,
 						include: themeDir,
-						use: [
-							resourceLoader,
-							{
-								loader: 'babel-loader',
-								options: {
-									presets: ['@babel/preset-env'],
-								},
-							},
-						],
+						use: [resourceLoader, LOADER_SCRIPT],
 					},
 					{
 						test: /\.html$/,
