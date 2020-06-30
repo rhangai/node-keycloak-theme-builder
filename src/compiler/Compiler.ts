@@ -5,10 +5,12 @@ import { createFsFromVolume, Volume } from 'memfs';
 import { Union } from 'unionfs';
 import { runInNewContext } from 'vm';
 import walkSync from 'walk-sync';
+import { AllHtmlEntities } from 'html-entities';
 
 const LOADER_MJML = path.resolve(__dirname, './loaders/mjml-loader');
 const LOADER_PUG = path.resolve(__dirname, './loaders/pug-loader');
 const LOADER_SCRIPT = path.resolve(__dirname, './loaders/script-loader');
+const entities = new AllHtmlEntities();
 
 export type CompilerOptions = {
 	themeDir: string;
@@ -43,8 +45,15 @@ export class Compiler {
 			loader: 'file-loader',
 			options: {
 				outputPath: 'resources',
-				publicPath: '${resourcesPath}',
-				name: '[name].[contenthash:8].[ext]',
+				publicPath: '${url.resourcesPath}',
+				name(filename: string) {
+					let ext = '[ext]';
+					const fileExt = path.extname(filename);
+					if (fileExt === '.scss') {
+						ext = 'css';
+					}
+					return `[name].[contenthash:8].${ext}`;
+				},
 			},
 		};
 		const htmlLoader = {
@@ -161,7 +170,9 @@ export class Compiler {
 			html = html.replace(
 				/<ftl\s+value="(.*?)"\s*(?:>(.*?)<\/ftl>|\/>)/gim,
 				(match: any, value: string, content: string) => {
-					return `<${value}>${content.trim()}`;
+					return `<${entities.decode(value)}>${
+						content ? content.trim() : ''
+					}`;
 				}
 			);
 			outputFiles[`${key}.ftl`] = html;
