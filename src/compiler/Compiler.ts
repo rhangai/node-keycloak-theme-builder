@@ -99,24 +99,15 @@ export class Compiler {
 					{
 						test: /\.mjml\.pug$/,
 						use: [
-							LOADER_MJML,
 							{
 								loader: 'html-loader',
 								options: {
 									minimize: {
 										removeAttributeQuotes: false,
 									},
-									attributes: {
-										list: [
-											{
-												tag: 'mj-image',
-												attribute: 'src',
-												type: 'src',
-											},
-										],
-									},
 								},
 							},
+							LOADER_MJML,
 							LOADER_PUG,
 						],
 					},
@@ -166,10 +157,7 @@ export class Compiler {
 
 		// Compile using webpack
 		const compiler = webpack(config);
-		const inputFs = this.createInputFileSystem(
-			compiler,
-			path.join(themeDir, entrypoint)
-		);
+		this.createInputFileSystem(compiler, path.join(themeDir, entrypoint));
 		const outputFs = this.createOutputFileSystem(compiler);
 		const stats = await new Promise<webpack.Stats>((resolve, reject) => {
 			compiler.run((err: Error | null, stats: any) => {
@@ -187,6 +175,9 @@ export class Compiler {
 		return { error: false, stats, outputFiles: outputFiles };
 	}
 
+	/**
+	 * Get every theme file as html
+	 */
 	private getTheme(outputFs: any, outputFiles: any) {
 		const output = outputFs.readFileSync(
 			path.join(this.outputDir, 'theme.js')
@@ -201,6 +192,11 @@ export class Compiler {
 		}
 	}
 
+	/**
+	 * Get the resources
+	 * @param outputFs
+	 * @param outputFiles
+	 */
 	private getResources(outputFs: any, outputFiles: any) {
 		const resourcesDir = path.join(this.outputDir, 'resources');
 		if (!outputFs.existsSync(resourcesDir)) return;
@@ -218,6 +214,9 @@ export class Compiler {
 		return files;
 	}
 
+	/**
+	 * Input file system with entrypoint
+	 */
 	private createInputFileSystem(compiler: any, entryPoint: string) {
 		const entries = [];
 		for (const key in this.options.files) {
@@ -239,7 +238,6 @@ export class Compiler {
 
 	/**
 	 * Output file system
-	 * @param compiler
 	 */
 	private createOutputFileSystem(compiler: any) {
 		const outputFs = createFsFromVolume(new Volume());
