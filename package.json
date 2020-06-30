@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",
-    "prepublish": "run-s clean build",
+    "prepare": "run-s clean build",
     "release": "standard-version"
   },
   "devDependencies": {
