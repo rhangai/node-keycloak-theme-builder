@@ -1,39 +1,40 @@
 import path from 'path';
 import webpack from 'webpack';
-import htmlRawLoader from './loaders/html-raw-loader';
-// @ts-ignore
-import merge from 'webpack-merge';
+import fs from 'fs-extra';
+import { createFsFromVolume, Volume } from 'memfs';
+import walkSync from 'walk-sync';
 
 const LOADER_HTML_RAW = path.resolve(__dirname, './loaders/html-raw-loader.ts');
 const LOADER_MJML = path.resolve(__dirname, './loaders/mjml-loader.ts');
 const LOADER_PUG = path.resolve(__dirname, './loaders/pug-loader.ts');
+
+export type ThemeBuilderOptions = {
+	themeDir: string;
+	outputDir: string;
+};
 
 export class ThemeBuilder {
 	private entry: any = {};
 	private resources = /\.(png|jpg|jpeg|woff|woff2|ttf)$/i;
 
 	/**
-	 *
-	 */
-	static create() {
-		return new ThemeBuilder();
-	}
-
-	/**
 	 * Cria o construtor de tema
 	 */
-	constructor() {}
+	constructor(private readonly options: ThemeBuilderOptions) {}
 
 	/**
 	 * Build the theme
 	 */
-	async build() {
+	async build(): Promise<webpack.Stats> {
 		// Resource loader
 		const outputLoader = {
 			loader: 'file-loader',
 			options: {
 				outputPath: 'theme',
-				name: '[name].html',
+				name(name: string) {
+					const names = path.basename(name).split('.');
+					return `${names[0]}.html`;
+				},
 			},
 		};
 		const resourceLoader = {
@@ -45,20 +46,22 @@ export class ThemeBuilder {
 			},
 		};
 
-		const configBase: webpack.Configuration = {
+		// Webpack config
+		const config: webpack.Configuration = {
+			mode: 'production',
 			context: path.resolve(__dirname, '../.local/theme'),
 			entry: {
 				login: './login.pug',
 				reset: './reset.mjml.pug',
 			},
 			output: {
-				path: path.resolve(__dirname, '../.local/tmp/theme'),
+				path: '/tmp/theme-builder',
 				filename: 'tmp/[name].js',
 			},
 			module: {
 				rules: [
 					{
-						test: /\.html/,
+						test: /\.html$/,
 						use: [
 							outputLoader,
 							LOADER_HTML_RAW,
@@ -77,6 +80,7 @@ export class ThemeBuilder {
 						test: /\.mjml\.pug$/,
 						use: [
 							outputLoader,
+							LOADER_HTML_RAW,
 							LOADER_MJML,
 							'extract-loader',
 							{
@@ -118,12 +122,16 @@ export class ThemeBuilder {
 						],
 					},
 					{
-						test: /\.css/,
+						test: /\.css$/,
+						use: [resourceLoader, 'extract-loader', 'css-loader'],
+					},
+					{
+						test: /\.scss$/,
 						use: [
-							// Load the css
 							resourceLoader,
 							'extract-loader',
 							'css-loader',
+							'sass-loader',
 						],
 					},
 					{
@@ -142,13 +150,36 @@ export class ThemeBuilder {
 			},
 		};
 
-		const config = merge([configBase]);
+		const webpackFs = this.createWebpackFs();
 		const compiler = webpack(config);
+		// @ts-ignore
+		compiler.outputFileSystem = webpackFs;
 		const stats = await new Promise<any>((resolve, reject) => {
 			compiler.run((err: Error | null, stats: any) => {
 				err ? reject(err) : resolve(stats);
 			});
 		});
+
+		const files = walkSync('/tmp/theme-builder/theme', {
+			fs: webpackFs,
+			directories: false,
+		});
+		for (const file of files) {
+			const content = webpackFs.readFileSync(
+				path.join('/tmp/theme-builder/theme', file)
+			);
+			await fs.outputFile(
+				path.resolve(this.options.outputDir, file),
+				content
+			);
+		}
 		return stats;
+	}
+
+	private createWebpackFs(): any {
+		const fs = createFsFromVolume(new Volume());
+		// @ts-ignore
+		fs.join = require('memory-fs/lib/join');
+		return fs;
 	}
 }
