@@ -167,14 +167,16 @@ export class Compiler {
 
 		for (const key in theme) {
 			let html = theme[key];
-			html = html.replace(
-				/<ftl\s+value="(.*?)"\s*(?:>(.*?)<\/ftl>|\/>)/gim,
-				(match: any, value: string, content: string) => {
-					return `<${entities.decode(value)}>${
-						content ? content.trim() : ''
-					}`;
-				}
-			);
+			html = html
+				.replace(
+					/<ftl\s+value="(.*?)"\s*\/?>/gim,
+					(match: any, value: string, content: string) => {
+						return `<${entities.decode(value)}>${
+							content ? content.trim() : ''
+						}`;
+					}
+				)
+				.replace(/<\/ftl>/gim, '');
 			outputFiles[`${key}.ftl`] = html;
 		}
 	}
