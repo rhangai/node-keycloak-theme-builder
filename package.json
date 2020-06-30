@@ -2,7 +2,7 @@
   "name": "keycloak-theme-builder",
   "version": "0.0.2",
   "description": "Theme builder for keycloak",
-  "main": "index.js",
+  "main": "dist/index.js",
   "bin": "dist/cli",
   "license": "MIT",
   "scripts": {
@@ -42,5 +42,7 @@
     "walk-sync": "^2.2.0",
     "webpack": "^4.43.0",
     "webpack-merge": "^4.2.2"
-  }
+  },
+  "repository": "git@github.com:rhangai/node-keycloak-theme-builder.git",
+  "author": "rhangai <hangai.renan@gmail.com>"
 }
