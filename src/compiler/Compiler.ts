@@ -47,6 +47,15 @@ export class Compiler {
 				name: '[name].[contenthash:8].[ext]',
 			},
 		};
+		const htmlLoader = {
+			loader: 'html-loader',
+			options: {
+				minimize: {
+					keepClosingSlash: true,
+					removeAttributeQuotes: false,
+				},
+			},
+		};
 
 		// Webpack config
 		const config: webpack.Configuration = {
@@ -75,46 +84,16 @@ export class Compiler {
 					},
 					{
 						test: /\.html$/,
-						use: [
-							{
-								loader: 'html-loader',
-								options: {
-									minimize: {
-										removeAttributeQuotes: false,
-									},
-								},
-							},
-						],
+						use: [htmlLoader],
 					},
 					{
 						test: /\.mjml\.pug$/,
-						use: [
-							{
-								loader: 'html-loader',
-								options: {
-									minimize: {
-										removeAttributeQuotes: false,
-									},
-								},
-							},
-							LOADER_MJML,
-							LOADER_PUG,
-						],
+						use: [htmlLoader, LOADER_MJML, LOADER_PUG],
 					},
 					{
 						test: /\.pug$/,
 						exclude: /\.mjml\.pug$/,
-						use: [
-							{
-								loader: 'html-loader',
-								options: {
-									minimize: {
-										removeAttributeQuotes: false,
-									},
-								},
-							},
-							LOADER_PUG,
-						],
+						use: [htmlLoader, LOADER_PUG],
 					},
 					{
 						test: /\.css$/,
@@ -178,7 +157,15 @@ export class Compiler {
 		const theme = context.__THEME__;
 
 		for (const key in theme) {
-			outputFiles[`${key}.ftl`] = theme[key];
+			let html = theme[key];
+			html = html.replace(
+				/<ftl\s+value="(.*?)"\s*(>.*?<\/ftl>|\/>)/gim,
+				(match: any, value: string) => {
+					console.log(match);
+					return `<${value}>`;
+				}
+			);
+			outputFiles[`${key}.ftl`] = html;
 		}
 	}
 
