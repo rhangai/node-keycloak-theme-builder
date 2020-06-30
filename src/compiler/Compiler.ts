@@ -159,10 +159,9 @@ export class Compiler {
 		for (const key in theme) {
 			let html = theme[key];
 			html = html.replace(
-				/<ftl\s+value="(.*?)"\s*(>.*?<\/ftl>|\/>)/gim,
-				(match: any, value: string) => {
-					console.log(match);
-					return `<${value}>`;
+				/<ftl\s+value="(.*?)"\s*(?:>(.*?)<\/ftl>|\/>)/gim,
+				(match: any, value: string, content: string) => {
+					return `<${value}>${content.trim()}`;
 				}
 			);
 			outputFiles[`${key}.ftl`] = html;
