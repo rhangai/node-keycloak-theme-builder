@@ -48,7 +48,11 @@ export class ThemeBuilder {
 	 * Get the files to copy
 	 */
 	private async buildCopy() {
-		const inputFiles = await this.glob(['theme.properties', 'text/**/*']);
+		const inputFiles = await this.glob([
+			'theme.properties',
+			'messages/*.properties',
+			'text/**/*',
+		]);
 		const outputFiles: Record<string, string | Buffer> = {};
 		for (const file of inputFiles) {
 			outputFiles[file] = await fs.readFile(
