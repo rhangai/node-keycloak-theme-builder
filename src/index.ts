@@ -1,14 +1,17 @@
-import { ThemeBuilder } from './ThemeBuilder';
+import { Compiler } from './compiler/Compiler';
 import path from 'path';
 
 async function main() {
 	try {
-		const builder = new ThemeBuilder({
-			outputDir: path.resolve('dist'),
+		const builder = new Compiler({
 			themeDir: '.local/theme',
+			files: {
+				login: './login.pug',
+			},
 		});
-		const stats = await builder.build();
+		const { stats, outputFiles } = await builder.build();
 		console.log(stats.toString({ colors: true }));
+		console.log(outputFiles);
 	} catch (err) {
 		console.error(err);
 	}
