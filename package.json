@@ -1,6 +1,6 @@
 {
   "name": "keycloak-theme-builder",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Theme builder for keycloak",
   "main": "dist/index.js",
   "bin": "dist/cli",
