@@ -170,10 +170,8 @@ export class Compiler {
 			html = html
 				.replace(
 					/<ftl\s+value="(.*?)"\s*\/?>/gim,
-					(match: any, value: string, content: string) => {
-						return `<${entities.decode(value)}>${
-							content ? content.trim() : ''
-						}`;
+					(match: any, value: string) => {
+						return `<${entities.decode(value)}>`;
 					}
 				)
 				.replace(/<\/ftl>/gim, '');
