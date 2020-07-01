@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://github.com/rhangai/node-keycloak-theme-builder/compare/v0.1.3...v0.1.4) (2020-07-01)
+
+
+### Bug Fixes
+
+* Compilation of ftl entities ([be2b928](https://github.com/rhangai/node-keycloak-theme-builder/commit/be2b9285b00b8147d4fd114beea38dcda68d4cec))
+
 ### [0.1.3](https://github.com/rhangai/node-keycloak-theme-builder/compare/v0.1.2...v0.1.3) (2020-06-30)
 
 ### [0.1.2](https://github.com/rhangai/node-keycloak-theme-builder/compare/v0.1.1...v0.1.2) (2020-06-30)
