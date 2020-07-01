@@ -56,6 +56,13 @@ export class Compiler {
 				},
 			},
 		};
+		const resourceRelativeLoader = {
+			loader: 'file-loader',
+			options: {
+				...resourceLoader.options,
+				publicPath: './',
+			},
+		};
 		const htmlLoader = {
 			loader: 'html-loader',
 			options: {
@@ -125,7 +132,11 @@ export class Compiler {
 								use: ['url-loader'],
 							},
 							{
+								issuer: /\.(html|pug)$/,
 								use: [resourceLoader],
+							},
+							{
+								use: [resourceRelativeLoader],
 							},
 						],
 					},
