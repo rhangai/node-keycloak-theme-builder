@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/rhangai/node-keycloak-theme-builder/compare/v0.1.5...v0.1.6) (2020-08-11)
+
+
+### Features
+
+* Better parsing of properties unicode encoding ([0558e00](https://github.com/rhangai/node-keycloak-theme-builder/commit/0558e00285d0dd92961fcd1c8def2aa41a62d42c))
+
 ### [0.1.5](https://github.com/rhangai/node-keycloak-theme-builder/compare/v0.1.4...v0.1.5) (2020-07-01)
 
 
