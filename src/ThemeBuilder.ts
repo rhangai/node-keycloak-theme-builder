@@ -1,7 +1,9 @@
+import { unicodeDecode, unicodeEncode } from './util/unicode';
 import { Compiler } from './compiler/Compiler';
 import fs from 'fs-extra';
 import path from 'path';
 import glob from 'fast-glob';
+import ini from 'ini';
 
 export type ThemeBuilderOptions = {
 	themeDir: string;
@@ -55,9 +57,18 @@ export class ThemeBuilder {
 		]);
 		const outputFiles: Record<string, string | Buffer> = {};
 		for (const file of inputFiles) {
-			outputFiles[file] = await fs.readFile(
+			const ext = path.extname(file);
+			let contents = await fs.readFile(
 				path.join(this.options.themeDir, file)
 			);
+			if (ext === '.properties') {
+				const config = ini.parse(contents.toString('utf8'));
+				for (const key in config) {
+					config[key] = unicodeEncode(unicodeDecode(config[key]));
+				}
+				contents = Buffer.from(ini.stringify(config), 'utf8');
+			}
+			outputFiles[file] = contents;
 		}
 		return { outputFiles };
 	}
